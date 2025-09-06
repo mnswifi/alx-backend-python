@@ -1,4 +1,4 @@
-#!/home/mnswifi/AlxProDevBackend/alxenv/bin/python
+#!/usr/bin/python3
 
 import mysql.connector
 from mysql.connector import Error
