@@ -3,14 +3,19 @@
 import mysql.connector
 from mysql.connector import Error
 from mysql.connector import errorcode
+from dotenv import load_dotenv
+import os
 import csv
 import uuid
 
+# Load environment variables from .env file
+load_dotenv()
+
 # Initial connection parameters
-host = "172.17.0.2"
-user = "root"
-password = "admin@alx"
-database = "ALX_prodev"
+host = os.getenv('host')
+user = os.getenv('user')
+password = os.getenv('password')
+database = os.getenv('database')
 
 def connect_db():
     try:
