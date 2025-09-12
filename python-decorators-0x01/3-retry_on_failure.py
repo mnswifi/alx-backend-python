@@ -58,6 +58,4 @@ def fetch_users_with_retry(conn):
 #### Fetch users with automatic retry on failure
 users = fetch_users_with_retry()
 
-users = fetch_users_with_retry()
-
 print(users)
