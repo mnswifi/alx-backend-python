@@ -1,5 +1,6 @@
 import sqlite3
 import functools
+from datetime import datetime
 
 
 def init_db():
@@ -27,7 +28,7 @@ def init_db():
     except sqlite3.IntegrityError:
         pass  # Ignore if data already exists
 
-    
+
     conn.commit()
     conn.close()
 
@@ -42,8 +43,15 @@ def log_queries(func):
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
         query = kwargs.get("query", None) or (args[0] if args else None)
-        print(f"Executing SQL Query: {query}")
-        return func(*args, **kwargs)
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        print(f"[{timestamp}]Executing SQL Query: {query}")
+        try:
+            result = func(*args, **kwargs)
+            print(f"[{timestamp}]Query executed successfully.")
+            return result
+        except Exception as e:
+            print(f"[{timestamp}]Error executing query: {e}")
+            raise
     return wrapper
 
 @log_queries
