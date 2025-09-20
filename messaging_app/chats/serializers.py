@@ -7,6 +7,8 @@ from .models import User, Conversation, Message
 
 
 class UserSerializer(serializers.ModelSerializer):
+    full_name = serializers.CharField(source='get_full_name', read_only=True)
+
     class Meta:
         model = User
         fields = [
@@ -17,6 +19,7 @@ class UserSerializer(serializers.ModelSerializer):
             "phone_number",
             "role",
             "created_at",
+            "full_name",
         ]
 
 # --------------------------
@@ -47,7 +50,7 @@ class MessageSerializer(serializers.ModelSerializer):
 
 class CoversationSerializer(serializers.ModelSerializer):
     participants = UserSerializer(many=True, read_only=True)
-    messages = MessageSerializer(many=True, read_only=True)
+    messages = serializers.SerializerMethodField()
 
     class Meta:
         model = Conversation
@@ -57,3 +60,22 @@ class CoversationSerializer(serializers.ModelSerializer):
             "created_at",
             "messages",
         ]
+
+    def get_messages(self, obj):
+        """
+        Return message for this conversation using nested MessageSerializer.
+        """
+        messages = obj.messages.all().order_by("sent_at")
+        return MessageSerializer(messages, many=True).data
+
+    def validate(self, data):
+        """
+        Example custom validation: conversations
+        must have atleast 2 participants.
+        """
+        participants = data.get("participants", [])
+        if len(participants) < 2:
+            raise serializers.ValidationError(
+                "A conversation must have atleast 2 participants."
+            )
+        return data
