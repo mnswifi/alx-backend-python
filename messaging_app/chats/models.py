@@ -24,7 +24,13 @@ class User(AbstractUser):
         ("host", "Host"),
         ("admin", "Admin"),
     ]
-    role = models.CharField(max_length=10, choices=ROLE_CHOICES, default="guest")
+    role = models.CharField(
+        max_length=10,
+        choices=ROLE_CHOICES,
+        default="guest"
+    )
+
+    password = models.CharField(max_length=128)
 
     created_at = models.DateTimeField(default=timezone.now)
 
