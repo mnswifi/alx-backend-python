@@ -105,7 +105,10 @@ class TestGithubOrgClient(unittest.TestCase):
             "expected_repos": ["repo1", "repo2", "repo3"],
             "apache2_repos": ["repo1", "repo3"],
         }
-    ])
+    ],
+        class_name_func=lambda cls, num, params_dict: f"{cls.__name__}_{num}"
+
+    )
     class TestIntegrationGithubOrgClient(unittest.TestCase):
         """Integration tests for GithubOrgClient."""
 
