@@ -48,7 +48,7 @@ class MessageSerializer(serializers.ModelSerializer):
 # --------------------------
 
 
-class CoversationSerializer(serializers.ModelSerializer):
+class ConversationSerializer(serializers.ModelSerializer):
     participants = UserSerializer(many=True, read_only=True)
     messages = serializers.SerializerMethodField()
 

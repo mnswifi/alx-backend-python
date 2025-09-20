@@ -27,6 +27,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+AUTH_USER_MODEL = 'chats.User'
 
 # Application definition
 
@@ -42,7 +43,7 @@ INSTALLED_APPS = [
     'rest_framework',
 
     # Local apps
-    # 'chats'
+    'chats'
 ]
 
 MIDDLEWARE = [
