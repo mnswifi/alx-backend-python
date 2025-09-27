@@ -11,7 +11,15 @@ from .serializers import UserSerializer, ConversationSerializer, MessageSerializ
 
 
 class ConversationViewSet(viewsets.ModelViewSet):
-    queryset = Conversation.objects.all().prefetch_related("participants", "messages")
+    def get_queryset(self):
+        # Only return conversations where the user is a participant
+        user = self.request.user
+        if user.is_authenticated:
+            return (
+                Conversation.objects.filter(participants=user)
+                .prefetch_related("participants", "messages")
+            )
+        return Conversation.objects.none()
     serializer_class = ConversationSerializer
     filter_backends = [filters.SearchFilter]
     search_fields = ["participants__email"]
@@ -53,7 +61,15 @@ class ConversationViewSet(viewsets.ModelViewSet):
 
 
 class MessageViewSet(viewsets.ModelViewSet):
-    queryset = Message.objects.all().select_related("sender", "conversation")
+    def get_queryset(self):
+        # Only return messages in conversations the user participates in
+        user = self.request.user
+        if user.is_authenticated:
+            return (
+                Message.objects.filter(conversation__participants=user)
+                .select_related("sender", "conversation")
+            )
+        return Message.objects.none()
     serializer_class = MessageSerializer
     filter_backends = [filters.SearchFilter]
     search_fields = ["message_body"]
@@ -74,7 +90,11 @@ class MessageViewSet(viewsets.ModelViewSet):
 
         if not conversation_id or not sender_id or not message_body:
             return Response(
-                {"error": "conversation, sender, and message_body are required."},
+                {
+                    "error": (
+                        "conversation, sender, and message_body are required."
+                    )
+                },
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
