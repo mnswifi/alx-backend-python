@@ -8,6 +8,10 @@ from .serializers import (
     ConversationSerializer,
     MessageSerializer,
 )
+from rest_framework.permissions import IsAuthenticated
+from rest_framework import status
+from rest_framework.response import Response
+from rest_framework import exceptions
 from .permissions import IsParticipantOfConversation
 
 
@@ -17,7 +21,7 @@ from .permissions import IsParticipantOfConversation
 
 
 class ConversationViewSet(viewsets.ModelViewSet):
-    permission_classes = [IsParticipantOfConversation]
+    permission_classes = [IsAuthenticated, IsParticipantOfConversation]
 
     def get_queryset(self):
         # Only return conversations where the user is a participant
@@ -69,7 +73,15 @@ class ConversationViewSet(viewsets.ModelViewSet):
 
 
 class MessageViewSet(viewsets.ModelViewSet):
-    permission_classes = [IsParticipantOfConversation]
+    permission_classes = [IsAuthenticated, IsParticipantOfConversation]
+
+    def handle_exception(self, exc):
+        if isinstance(exc, exceptions.PermissionDenied):
+            return Response(
+                {"detail": "Forbidden"},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+        return super().handle_exception(exc)
 
     def get_queryset(self):
         # Only return messages in conversations the user participates in

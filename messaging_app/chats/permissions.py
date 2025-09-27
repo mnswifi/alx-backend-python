@@ -13,10 +13,19 @@ class IsParticipantOfConversation(permissions.BasePermission):
 
     def has_object_permission(self, request, view, obj):
         user = request.user
-        # For Conversation objects
-        if hasattr(obj, 'participants'):
-            return user in obj.participants.all()
-        # For Message objects
-        if hasattr(obj, 'conversation'):
-            return user in obj.conversation.participants.all()
-        return False
+        # Safe methods (GET, HEAD, OPTIONS) are allowed for participants
+        if request.method in permissions.SAFE_METHODS:
+            if hasattr(obj, 'participants'):
+                return user in obj.participants.all()
+            if hasattr(obj, 'conversation'):
+                return user in obj.conversation.participants.all()
+            return False
+        # PUT, PATCH, DELETE are only allowed for participants
+        if request.method in ["PUT", "PATCH", "DELETE"]:
+            if hasattr(obj, 'participants'):
+                return user in obj.participants.all()
+            if hasattr(obj, 'conversation'):
+                return user in obj.conversation.participants.all()
+            return False
+        # POST is allowed for authenticated users (handled by has_permission)
+        return True
