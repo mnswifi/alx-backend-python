@@ -1,7 +1,42 @@
 
 import os
+import time
 from datetime import datetime
+from collections import defaultdict, deque
 from django.http import HttpResponseForbidden
+
+
+class OffensiveLanguageMiddleware:
+    def __init__(self, get_response):
+        self.get_response = get_response
+        # Store timestamps of POSTs per IP
+        self.ip_message_times = defaultdict(deque)
+
+    def __call__(self, request):
+        # Only limit POST requests to the message endpoint
+        if request.method == 'POST' and '/messages' in request.path:
+            ip = self.get_client_ip(request)
+            now = time.time()
+            window = 60  # 1 minute
+            max_messages = 5
+            times = self.ip_message_times[ip]
+            # Remove timestamps older than 1 minute
+            while times and now - times[0] > window:
+                times.popleft()
+            if len(times) >= max_messages:
+                return HttpResponseForbidden(
+                    'Message rate limit exceeded: 5 messages per minute.'
+                )
+            times.append(now)
+        return self.get_response(request)
+
+    def get_client_ip(self, request):
+        x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+        if x_forwarded_for:
+            ip = x_forwarded_for.split(',')[0]
+        else:
+            ip = request.META.get('REMOTE_ADDR')
+        return ip
 
 
 class RestrictAccessByTimeMiddleware:
