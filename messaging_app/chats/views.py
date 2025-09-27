@@ -1,8 +1,14 @@
 from rest_framework import viewsets, status, filters
 from rest_framework.response import Response
 from django.shortcuts import render, get_object_or_404
+
 from .models import User, Conversation, Message
-from .serializers import UserSerializer, ConversationSerializer, MessageSerializer
+from .serializers import (
+    UserSerializer,
+    ConversationSerializer,
+    MessageSerializer,
+)
+from .permissions import IsParticipantOfConversation
 
 
 # --------------------
@@ -11,6 +17,8 @@ from .serializers import UserSerializer, ConversationSerializer, MessageSerializ
 
 
 class ConversationViewSet(viewsets.ModelViewSet):
+    permission_classes = [IsParticipantOfConversation]
+
     def get_queryset(self):
         # Only return conversations where the user is a participant
         user = self.request.user
@@ -61,6 +69,8 @@ class ConversationViewSet(viewsets.ModelViewSet):
 
 
 class MessageViewSet(viewsets.ModelViewSet):
+    permission_classes = [IsParticipantOfConversation]
+
     def get_queryset(self):
         # Only return messages in conversations the user participates in
         user = self.request.user
