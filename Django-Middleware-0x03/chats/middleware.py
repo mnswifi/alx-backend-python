@@ -1,3 +1,9 @@
+import os
+import time
+from datetime import datetime
+from collections import defaultdict, deque
+from django.http import HttpResponseForbidden
+
 
 class RolepermissionMiddleware:
     def __init__(self, get_response):
@@ -12,12 +18,6 @@ class RolepermissionMiddleware:
                     return self.get_response(request)
                 return HttpResponseForbidden('You do not have permission to perform this action.')
         return self.get_response(request)
-
-import os
-import time
-from datetime import datetime
-from collections import defaultdict, deque
-from django.http import HttpResponseForbidden
 
 
 class OffensiveLanguageMiddleware:
