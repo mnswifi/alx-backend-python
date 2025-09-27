@@ -13,6 +13,8 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework import exceptions
 from .permissions import IsParticipantOfConversation
+from .filters import MessageFilter
+from .pagination import MessagePagination
 
 
 # --------------------
@@ -73,7 +75,10 @@ class ConversationViewSet(viewsets.ModelViewSet):
 
 
 class MessageViewSet(viewsets.ModelViewSet):
+
     permission_classes = [IsAuthenticated, IsParticipantOfConversation]
+    filterset_class = MessageFilter
+    pagination_class = MessagePagination
 
     def handle_exception(self, exc):
         if isinstance(exc, exceptions.PermissionDenied):
