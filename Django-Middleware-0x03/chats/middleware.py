@@ -1,4 +1,18 @@
 
+class RolepermissionMiddleware:
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        user = getattr(request, 'user', None)
+        if user and user.is_authenticated:
+            # Accept if user is admin or moderator
+            if hasattr(user, 'role'):
+                if user.role in ['admin', 'moderator']:
+                    return self.get_response(request)
+                return HttpResponseForbidden('You do not have permission to perform this action.')
+        return self.get_response(request)
+
 import os
 import time
 from datetime import datetime
